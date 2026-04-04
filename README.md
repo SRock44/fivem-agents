@@ -1,72 +1,46 @@
-# FiveM Parallel Agent Swarm for Claude Code
+# FiveM agent prompts for Claude Code
 
-Drop this into your FiveM server repo root. Five specialist agents run in parallel via `claude --print`.
+Drop this folder into your **FiveM server or resource repo**. [Claude Code](https://code.claude.com/) loads **`CLAUDE.md`** from the project root and uses it as the coordinator; specialist behavior lives in **`.claude/agents/*.md`**.
 
 ## Structure
 
 ```
 .claude/
   agents/
-    cfx.md        # FXServer runtime, manifest, server.cfg, natives
-    qbcore.md     # QBCore framework, jobs, items, player state
-    ox.md         # ox_lib, ox_inventory, ox_target, oxmysql
-    events.md     # Net events, commands, keymaps, rate limiting
-    nui.md        # CEF browser UI, NUI callbacks, React/Vue
-  settings.json   # Auto-allow subagent spawning
-CLAUDE.md         # Coordinator prompt (claude reads this automatically)
-dispatch.sh       # CLI for parallel dispatch
+    cfx.md          # FXServer runtime, manifest, server.cfg, natives
+    qbcore.md       # QBCore framework, jobs, items, player state
+    ox.md           # ox_lib, ox_inventory, ox_target, oxmysql
+    events.md       # Net events, commands, keymaps, rate limiting
+    nui.md          # CEF browser UI, NUI callbacks, React/Vue
+    pm.md           # End-to-end verification / PM sign-off
+    bug-review.md   # Common FiveM bugs and fixes
+    test.md         # Lua + Vitest / JS test expansion
+  settings.json     # Optional Claude Code project settings
+CLAUDE.md           # Coordinator (read automatically when at repo root)
 ```
 
 ## Usage
 
-### Inside Claude Code (interactive)
+Describe what you want in Claude Code. The coordinator in `CLAUDE.md` picks the right agents and **reads** the matching prompt files before implementing each layer.
 
-Just describe what you want. The coordinator (CLAUDE.md) knows the roster and will dispatch agents:
-
-```
-> Build a mechanic job resource with ox_target interactions and a React tablet NUI
-```
-
-### Via dispatch.sh (CLI)
-
-```bash
-# All agents in parallel
-./dispatch.sh full "Build a gas station robbery resource with progress bars and police alerts"
-
-# Server-side only
-./dispatch.sh server "Add a fishing job with rod item requirement and fish item rewards"
-
-# Client + NUI
-./dispatch.sh client "Build a phone app NUI with contact list and messaging"
-
-# Pick specific agents
-./dispatch.sh custom "Add ox_target options to all ATM props" cfx,ox,events
-```
-
-### Direct subagent call
-
-```bash
-claude --print -p "$(cat .claude/agents/ox.md)
-
-TASK: Register a stash at coords 123.0, 456.0, 78.0 with 50 slots for mechanic job only"
-```
-
-## Pipeline Order
-
-When agents need each other's output, chain them:
+Examples:
 
 ```
-Phase 1 (parallel): cfx (manifest) + events (contract design)
-Phase 2 (parallel): qbcore (server logic) + ox (library calls)
-Phase 3:            nui (if browser UI needed)
-Phase 4:            coordinator merges and verifies
+Build a mechanic job resource with ox_target interactions and a React tablet NUI
 ```
 
-## TODO Handoff Convention
+To force a specific lens for one turn, **@-mention** the agent file, e.g. `@.claude/agents/ox.md`, then ask your question.
 
-Agents mark cross-domain dependencies as comments:
-- `-- TODO(qbcore): verify Player.Functions export name`
-- `-- TODO(ox): check ox_inventory metadata format`
-- `-- TODO(cfx): add to server.cfg ensure order`
+## Pipeline
 
-The coordinator (or you) resolves these after merging.
+When work is sequential, follow the phase order in `CLAUDE.md` (manifest/events → server/qb+ox → NUI → tests → bug-review → pm sign-off). Skip phases that do not apply.
+
+## TODO handoff convention
+
+Agents mark cross-domain gaps in code comments:
+
+- `-- TODO(qbcore): ...`
+- `-- TODO(ox): ...`
+- `-- TODO(cfx): ...`
+
+Resolve these when merging layers.
