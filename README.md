@@ -12,6 +12,7 @@ Drop this folder into your **FiveM server or resource repo**. [Claude Code](http
     ox.md           # ox_lib, ox_inventory, ox_target, oxmysql
     events.md       # Net events, commands, keymaps, rate limiting
     nui.md          # CEF browser UI, NUI callbacks, React/Vue
+    perf.md         # Performance at 280+ players: hot paths, DB, fan-out
     pm.md           # End-to-end verification / PM sign-off
     bug-review.md   # Common FiveM bugs and fixes
     test.md         # Lua + Vitest / JS test expansion
@@ -33,7 +34,7 @@ To force a specific lens for one turn, **@-mention** the agent file, e.g. `@.cla
 
 ## Pipeline
 
-When work is sequential, follow the phase order in `CLAUDE.md` (manifest/events → server/qb+ox → NUI → tests → bug-review → pm sign-off). Skip phases that do not apply.
+When work is sequential, follow the phase order in `CLAUDE.md` (manifest/events → server/qb+ox → NUI → **perf** → tests → bug-review → pm sign-off). Skip phases that do not apply.
 
 ## TODO handoff convention
 
@@ -42,5 +43,6 @@ Agents mark cross-domain gaps in code comments:
 - `-- TODO(qbcore): ...`
 - `-- TODO(ox): ...`
 - `-- TODO(cfx): ...`
+- `-- TODO(perf): ...` (hot path or broadcast needs scale review)
 
 Resolve these when merging layers.
